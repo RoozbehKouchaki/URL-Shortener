@@ -1,0 +1,36 @@
+# ---- OS / editor ----
+.DS_Store
+Thumbs.db
+*.swp
+
+# ---- Java / Maven (backend) ----
+target/
+!.mvn/wrapper/maven-wrapper.jar
+*.class
+
+# ---- H2 file-based database (runtime data, not source) ----
+data/
+*.mv.db
+*.trace.db
+
+# ---- Angular / Node (frontend, added in later tasks) ----
+node_modules/
+dist/
+.angular/
+
+# ---- Kiro spec/config files (not for the repo) ----
+.kiro/
+
+# ---- Markdown docs (excluded for now) ----
+*.md
+
+# ---- Logs ----
+*.log
+
+# ---- IDE ----
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
