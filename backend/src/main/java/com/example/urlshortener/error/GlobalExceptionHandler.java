@@ -8,10 +8,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 /**
  * Translates exceptions into a consistent {@link ErrorResponse}. Response
@@ -56,6 +60,39 @@ public class GlobalExceptionHandler {
         log.error("Short code generation exhausted", ex);
         return build(HttpStatus.INTERNAL_SERVER_ERROR,
                 "Could not generate a unique short code. Please try again.", null);
+    }
+
+    /**
+     * Malformed or unreadable request body (for example invalid JSON) -> 400.
+     * These are caller mistakes, so no error-level stack trace is logged.
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleUnreadable(HttpMessageNotReadableException ex) {
+        return build(HttpStatus.BAD_REQUEST, "Malformed request body.", null);
+    }
+
+    /**
+     * Wrong HTTP method for the path -> 405.
+     */
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ErrorResponse> handleMethodNotSupported(HttpRequestMethodNotSupportedException ex) {
+        return build(HttpStatus.METHOD_NOT_ALLOWED, "HTTP method not supported for this endpoint.", null);
+    }
+
+    /**
+     * Missing or unsupported Content-Type -> 415.
+     */
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<ErrorResponse> handleMediaTypeNotSupported(HttpMediaTypeNotSupportedException ex) {
+        return build(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "Unsupported or missing Content-Type.", null);
+    }
+
+    /**
+     * No handler/resource for the requested path -> 404.
+     */
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNoResource(NoResourceFoundException ex) {
+        return build(HttpStatus.NOT_FOUND, "Resource not found.", null);
     }
 
     /**

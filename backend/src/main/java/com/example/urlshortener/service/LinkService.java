@@ -72,10 +72,7 @@ public class LinkService {
      */
     @Transactional
     public void recordClick(String shortCode) {
-        linkRepository.findByShortCode(shortCode).ifPresent(link -> {
-            link.incrementClickCount();
-            linkRepository.save(link);
-        });
+        linkRepository.incrementClickCount(shortCode);
     }
 
     /**

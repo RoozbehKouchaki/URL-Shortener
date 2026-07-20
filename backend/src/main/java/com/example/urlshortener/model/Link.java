@@ -70,24 +70,12 @@ public class Link {
         return shortCode;
     }
 
-    public void setShortCode(String shortCode) {
-        this.shortCode = shortCode;
-    }
-
     public String getLongUrl() {
         return longUrl;
     }
 
-    public void setLongUrl(String longUrl) {
-        this.longUrl = longUrl;
-    }
-
     public String getOwnerUsername() {
         return ownerUsername;
-    }
-
-    public void setOwnerUsername(String ownerUsername) {
-        this.ownerUsername = ownerUsername;
     }
 
     public boolean isActive() {
@@ -102,19 +90,7 @@ public class Link {
         return clickCount;
     }
 
-    public void setClickCount(long clickCount) {
-        this.clickCount = clickCount;
-    }
-
-    public void incrementClickCount() {
-        this.clickCount++;
-    }
-
     public Instant getCreatedAt() {
         return createdAt;
-    }
-
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
     }
 }
