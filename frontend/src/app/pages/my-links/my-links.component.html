@@ -1,0 +1,57 @@
+<section class="my-links">
+  <div class="head">
+    <h2>My Links</h2>
+    <button type="button" class="refresh" (click)="reload()" [disabled]="loading">
+      Refresh
+    </button>
+  </div>
+
+  @if (loading) {
+    <p class="status">Loading...</p>
+  } @else if (error) {
+    <p class="status error" role="alert">{{ error }}</p>
+  } @else if (items.length === 0) {
+    <p class="status">You haven't created any links yet.</p>
+  } @else {
+    <table>
+      <thead>
+        <tr>
+          <th>Short URL</th>
+          <th>Long URL</th>
+          <th>Status</th>
+          <th class="num">Clicks</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (link of items; track link.shortCode) {
+          <tr>
+            <td>
+              <a [href]="link.shortUrl" target="_blank" rel="noopener">{{ link.shortUrl }}</a>
+            </td>
+            <td class="long">
+              <span [title]="link.longUrl">{{ link.longUrl }}</span>
+            </td>
+            <td>
+              <span class="badge" [class.active]="link.active" [class.inactive]="!link.active">
+                {{ link.active ? 'Active' : 'Inactive' }}
+              </span>
+            </td>
+            <td class="num">{{ link.clickCount }}</td>
+            <td class="actions">
+              @if (link.active) {
+                <button
+                  type="button"
+                  (click)="deactivate(link)"
+                  [disabled]="isDeactivating(link.shortCode)"
+                >
+                  {{ isDeactivating(link.shortCode) ? 'Deactivating...' : 'Deactivate' }}
+                </button>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</section>

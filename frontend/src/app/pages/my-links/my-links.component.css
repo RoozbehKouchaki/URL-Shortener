@@ -1,0 +1,114 @@
+.my-links {
+  margin: 2rem 0;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.refresh {
+  padding: 0.35rem 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.refresh:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.status {
+  margin-top: 1rem;
+  color: #666;
+}
+
+.status.error {
+  color: #b91c1c;
+}
+
+table {
+  width: 100%;
+  margin-top: 1rem;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 0.6rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+  vertical-align: middle;
+}
+
+th {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  color: #555;
+}
+
+th.num,
+td.num {
+  text-align: right;
+}
+
+td a {
+  color: #1d4ed8;
+  white-space: nowrap;
+}
+
+td.long {
+  max-width: 22rem;
+}
+
+td.long span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #444;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badge.active {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.badge.inactive {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+td.actions {
+  text-align: right;
+}
+
+td.actions button {
+  padding: 0.35rem 0.75rem;
+  border: 1px solid #e5b4b4;
+  border-radius: 4px;
+  background: #fff;
+  color: #b91c1c;
+  cursor: pointer;
+}
+
+td.actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}

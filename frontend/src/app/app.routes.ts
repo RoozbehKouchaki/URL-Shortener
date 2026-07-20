@@ -4,8 +4,7 @@ import { LoginComponent } from './pages/login/login.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 
 /**
- * Login and dashboard routes. A guard that keeps unauthenticated users on the
- * login view is added in task 16; for now the default path lands on login.
+ * Login and dashboard routes. The default path lands on the login view.
  */
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },

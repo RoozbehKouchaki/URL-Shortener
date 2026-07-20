@@ -1,6 +1,6 @@
 <section class="dashboard">
   <header>
-    <h1>My Links</h1>
+    <h1>URL Shortener</h1>
     <div class="user">
       @if (username) {
         <span>Signed in as <strong>{{ username }}</strong></span>
@@ -9,9 +9,7 @@
     </div>
   </header>
 
-  <app-create-link />
+  <app-create-link (created)="linksTable.reload()" />
 
-  <p class="placeholder">
-    The links table is coming next.
-  </p>
+  <app-my-links #linksTable />
 </section>

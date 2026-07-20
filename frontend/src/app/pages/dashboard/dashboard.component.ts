@@ -3,16 +3,16 @@ import { Router } from '@angular/router';
 
 import { AuthService } from '../../services/auth.service';
 import { CreateLinkComponent } from '../create-link/create-link.component';
+import { MyLinksComponent } from '../my-links/my-links.component';
 
 /**
- * Dashboard shown after a successful sign-in. Hosts the create-link form; the
- * my-links table is added here later. A route guard that keeps
- * unauthenticated users out is wired in task 16.
+ * Dashboard shown after a successful sign-in. Hosts the create-link form and
+ * the my-links table, and lets the user sign out.
  */
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CreateLinkComponent],
+  imports: [CreateLinkComponent, MyLinksComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })
