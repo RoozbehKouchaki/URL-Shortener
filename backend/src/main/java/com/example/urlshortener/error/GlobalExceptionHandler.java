@@ -1,5 +1,6 @@
 package com.example.urlshortener.error;
 
+import com.example.urlshortener.exception.InvalidUrlException;
 import com.example.urlshortener.exception.LinkNotFoundException;
 import com.example.urlshortener.exception.NotLinkOwnerException;
 import com.example.urlshortener.exception.ShortCodeGenerationException;
@@ -33,6 +34,11 @@ public class GlobalExceptionHandler {
         String message = fieldError != null ? fieldError.getDefaultMessage() : "Invalid request.";
 
         return build(HttpStatus.BAD_REQUEST, message, field);
+    }
+
+    @ExceptionHandler(InvalidUrlException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidUrl(InvalidUrlException ex) {
+        return build(HttpStatus.BAD_REQUEST, ex.getMessage(), "longUrl");
     }
 
     @ExceptionHandler(NotLinkOwnerException.class)
