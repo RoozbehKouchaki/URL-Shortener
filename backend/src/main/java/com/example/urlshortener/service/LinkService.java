@@ -2,7 +2,10 @@ package com.example.urlshortener.service;
 
 import com.example.urlshortener.config.AppProperties;
 import com.example.urlshortener.dto.LinkResponse;
+import com.example.urlshortener.dto.LinkStatsResponse;
 import com.example.urlshortener.exception.InvalidUrlException;
+import com.example.urlshortener.exception.LinkNotFoundException;
+import com.example.urlshortener.exception.NotLinkOwnerException;
 import com.example.urlshortener.exception.ShortCodeGenerationException;
 import com.example.urlshortener.model.Link;
 import com.example.urlshortener.repository.LinkRepository;
@@ -11,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -51,11 +55,56 @@ public class LinkService {
     }
 
     /**
+     * Return the caller's Links, newest first. Empty when the caller owns none.
+     */
+    @Transactional(readOnly = true)
+    public List<LinkResponse> listMine(String ownerUsername) {
+        return linkRepository.findByOwnerUsernameOrderByCreatedAtDesc(ownerUsername).stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    /**
+     * Deactivate a Link the caller owns. Idempotent: an already-inactive Link
+     * stays inactive and still succeeds. The Link and its Click Count are kept,
+     * never deleted.
+     */
+    @Transactional
+    public LinkResponse deactivate(String shortCode, String requestingUser) {
+        Link link = findOwnedLink(shortCode, requestingUser);
+        link.setActive(false);
+        return toResponse(linkRepository.save(link));
+    }
+
+    /**
+     * Return the Click Count for a Link the caller owns.
+     */
+    @Transactional(readOnly = true)
+    public LinkStatsResponse stats(String shortCode, String requestingUser) {
+        Link link = findOwnedLink(shortCode, requestingUser);
+        return new LinkStatsResponse(link.getShortCode(), link.getClickCount());
+    }
+
+    /**
      * Map an entity to its client-facing response, joining the configured base
      * address with the Short Code.
      */
     public LinkResponse toResponse(Link link) {
         return LinkResponse.from(link, appProperties.getBaseAddress());
+    }
+
+    /**
+     * Load a Link by code, rejecting an unknown code (404) and a caller who is
+     * not the owner (403).
+     */
+    private Link findOwnedLink(String shortCode, String requestingUser) {
+        Link link = linkRepository.findByShortCode(shortCode)
+                .orElseThrow(() -> new LinkNotFoundException("No link found for the given short code."));
+
+        if (!link.getOwnerUsername().equals(requestingUser)) {
+            throw new NotLinkOwnerException("You do not own this link.");
+        }
+        return link;
     }
 
     private String generateUniqueShortCode() {
