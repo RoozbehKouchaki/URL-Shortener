@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -52,6 +53,29 @@ public class LinkService {
         Link saved = linkRepository.save(new Link(shortCode, normalizedUrl, ownerUsername));
 
         return toResponse(saved);
+    }
+
+    /**
+     * Resolve the redirect target for a Short Code, present only when the Link
+     * exists and is active.
+     */
+    @Transactional(readOnly = true)
+    public Optional<String> resolveActiveTarget(String shortCode) {
+        return linkRepository.findByShortCode(shortCode)
+                .filter(Link::isActive)
+                .map(Link::getLongUrl);
+    }
+
+    /**
+     * Record a click on a Short Code. Best-effort: callers treat a failure here
+     * as non-fatal so the redirect is still served.
+     */
+    @Transactional
+    public void recordClick(String shortCode) {
+        linkRepository.findByShortCode(shortCode).ifPresent(link -> {
+            link.incrementClickCount();
+            linkRepository.save(link);
+        });
     }
 
     /**
