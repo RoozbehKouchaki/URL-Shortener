@@ -1,0 +1,15 @@
+<section class="dashboard">
+  <header>
+    <h1>My Links</h1>
+    <div class="user">
+      @if (username) {
+        <span>Signed in as <strong>{{ username }}</strong></span>
+      }
+      <button type="button" (click)="signOut()">Sign out</button>
+    </div>
+  </header>
+
+  <p class="placeholder">
+    The create-link form and links table are coming next.
+  </p>
+</section>
