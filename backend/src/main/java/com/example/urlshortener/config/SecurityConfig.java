@@ -1,7 +1,6 @@
 package com.example.urlshortener.config;
 
 import com.example.urlshortener.security.RestAuthenticationEntryPoint;
-import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -52,7 +51,7 @@ public class SecurityConfig {
                         // Error rendering must never require authentication.
                         .requestMatchers("/error").permitAll()
                         // H2 console for local development.
-                        .requestMatchers(PathRequest.toH2Console()).permitAll()
+                        .requestMatchers("/h2-console/**").permitAll()
                         // All management endpoints require valid credentials.
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().authenticated())
