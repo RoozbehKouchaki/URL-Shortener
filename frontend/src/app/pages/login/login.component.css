@@ -21,6 +21,12 @@ form {
   flex-direction: column;
 }
 
+.field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+}
+
 label {
   margin-bottom: 0.25rem;
   font-weight: 600;
@@ -28,11 +34,24 @@ label {
 }
 
 input {
-  margin-bottom: 1rem;
   padding: 0.5rem;
   border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 1rem;
+}
+
+input.invalid {
+  border-color: #dc2626;
+}
+
+input.invalid:focus {
+  outline-color: #dc2626;
+}
+
+.field-error {
+  margin: 0.35rem 0 0;
+  color: #b91c1c;
+  font-size: 0.8rem;
 }
 
 button {

@@ -3,22 +3,38 @@
   <p class="subtitle">Sign in with a demo account.</p>
 
   <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
-    <label for="username">Username</label>
-    <input
-      id="username"
-      type="text"
-      formControlName="username"
-      autocomplete="username"
-      autofocus
-    />
+    <div class="field">
+      <label for="username">Username</label>
+      <input
+        id="username"
+        type="text"
+        formControlName="username"
+        autocomplete="username"
+        autofocus
+        [class.invalid]="isInvalid('username')"
+        [attr.aria-invalid]="isInvalid('username')"
+        aria-describedby="username-error"
+      />
+      @if (isInvalid('username')) {
+        <p id="username-error" class="field-error">Please enter your username.</p>
+      }
+    </div>
 
-    <label for="password">Password</label>
-    <input
-      id="password"
-      type="password"
-      formControlName="password"
-      autocomplete="current-password"
-    />
+    <div class="field">
+      <label for="password">Password</label>
+      <input
+        id="password"
+        type="password"
+        formControlName="password"
+        autocomplete="current-password"
+        [class.invalid]="isInvalid('password')"
+        [attr.aria-invalid]="isInvalid('password')"
+        aria-describedby="password-error"
+      />
+      @if (isInvalid('password')) {
+        <p id="password-error" class="field-error">Please enter your password.</p>
+      }
+    </div>
 
     @if (error) {
       <p class="error" role="alert">{{ error }}</p>

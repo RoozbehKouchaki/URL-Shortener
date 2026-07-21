@@ -36,8 +36,17 @@ export class LoginComponent {
   submitting = false;
   error: string | null = null;
 
+  /** True once a control is invalid and the user has interacted with it. */
+  isInvalid(controlName: 'username' | 'password'): boolean {
+    const control = this.form.controls[controlName];
+    return control.invalid && control.touched;
+  }
+
   onSubmit(): void {
+    this.error = null;
+
     if (this.form.invalid || this.submitting) {
+      // Reveal the per-field messages when required fields are still empty.
       this.form.markAllAsTouched();
       return;
     }
@@ -48,7 +57,6 @@ export class LoginComponent {
     // validation call below; clear again if the credentials turn out invalid.
     this.auth.setCredentials(username, password);
     this.submitting = true;
-    this.error = null;
 
     this.http.get('/api/links').subscribe({
       next: () => {
