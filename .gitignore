@@ -21,9 +21,6 @@ dist/
 # ---- Kiro spec/config files (not for the repo) ----
 .kiro/
 
-# ---- Markdown docs (excluded for now) ----
-*.md
-
 # ---- Logs ----
 *.log
 
