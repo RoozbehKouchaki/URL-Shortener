@@ -9,6 +9,8 @@ import com.example.urlshortener.exception.NotLinkOwnerException;
 import com.example.urlshortener.exception.ShortCodeGenerationException;
 import com.example.urlshortener.model.Link;
 import com.example.urlshortener.repository.LinkRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +25,8 @@ import java.util.Set;
  */
 @Service
 public class LinkService {
+
+    private static final Logger log = LoggerFactory.getLogger(LinkService.class);
 
     private static final int MAX_CODE_ATTEMPTS = 5;
     private static final Set<String> LOOPBACK_HOSTS = Set.of("localhost", "127.0.0.1", "::1", "[::1]");
@@ -67,12 +71,36 @@ public class LinkService {
     }
 
     /**
+     * Resolve the redirect target for a Short Code and, when a target exists,
+     * record the click as a best-effort side effect. This is the single entry
+     * point for the public redirect path: the controller only maps the result
+     * to a 302 (target present) or 404 (empty).
+     *
+     * <p>Click recording runs in its own transaction (via the repository's
+     * atomic update) and is wrapped so that a failure to record never prevents
+     * the redirect from being served.
+     */
+    public Optional<String> resolveTargetAndRecordClick(String shortCode) {
+        Optional<String> target = resolveActiveTarget(shortCode);
+        target.ifPresent(ignored -> recordClickBestEffort(shortCode));
+        return target;
+    }
+
+    /**
      * Record a click on a Short Code. Best-effort: callers treat a failure here
      * as non-fatal so the redirect is still served.
      */
     @Transactional
     public void recordClick(String shortCode) {
         linkRepository.incrementClickCount(shortCode);
+    }
+
+    private void recordClickBestEffort(String shortCode) {
+        try {
+            recordClick(shortCode);
+        } catch (RuntimeException e) {
+            log.warn("Failed to record click for short code '{}'; serving redirect anyway.", shortCode, e);
+        }
     }
 
     /**
