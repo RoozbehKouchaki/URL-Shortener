@@ -1,61 +1,61 @@
 package com.example.urlshortener.config;
 
 import com.example.urlshortener.security.RestAuthenticationEntryPoint;
+import com.example.urlshortener.service.DemoUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
-/**
- * HTTP Basic security configuration.
- *
- * <ul>
- *   <li>{@code permitAll} on the public redirect path
- *       {@code GET /{shortCode:[A-Za-z0-9]{7}}} and the error path.</li>
- *   <li>{@code authenticated} on {@code /api/**}.</li>
- *   <li>Stateless session policy: identity is re-established from the
- *       credentials on every request (Requirement 6.5).</li>
- *   <li>A custom {@link RestAuthenticationEntryPoint} writes the 401
- *       {@code ErrorResponse} JSON and omits {@code WWW-Authenticate}.</li>
- * </ul>
- */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
-    /**
-     * Passwords are verified against BCrypt hashes, never plain text.
-     */
+    private static final String LOGIN_PATH = "/api/auth/login";
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    /** Declared explicitly because the filter chain no longer checks passwords. */
+    @Bean
+    public AuthenticationManager authenticationManager(DemoUserDetailsService userDetailsService,
+                                                       PasswordEncoder passwordEncoder) {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
+        provider.setPasswordEncoder(passwordEncoder);
+        return new ProviderManager(provider);
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
-                                                   RestAuthenticationEntryPoint authenticationEntryPoint)
+                                                   RestAuthenticationEntryPoint authenticationEntryPoint,
+                                                   JwtAuthenticationConverter jwtAuthenticationConverter)
             throws Exception {
         http
-                // Stateless REST API + Basic auth: no CSRF tokens or server-side sessions.
+                // Safe: the token travels in an Authorization header, which browsers
+                // do not attach automatically.
                 .csrf(csrf -> csrf.disable())
-                // Allow the H2 console (dev only) to render inside its frame.
                 .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
                 .authorizeHttpRequests(auth -> auth
-                        // Public redirect path: exactly seven base62 characters.
                         .requestMatchers(HttpMethod.GET, "/{shortCode:[A-Za-z0-9]{7}}").permitAll()
-                        // Error rendering must never require authentication.
+                        .requestMatchers(HttpMethod.POST, LOGIN_PATH).permitAll()
                         .requestMatchers("/error").permitAll()
-                        // H2 console for local development.
                         .requestMatchers("/h2-console/**").permitAll()
-                        // All management endpoints require valid credentials.
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().authenticated())
-                .httpBasic(basic -> basic.authenticationEntryPoint(authenticationEntryPoint))
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter))
+                        .authenticationEntryPoint(authenticationEntryPoint))
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 

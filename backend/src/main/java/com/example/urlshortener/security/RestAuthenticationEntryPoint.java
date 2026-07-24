@@ -12,15 +12,9 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 
 /**
- * Writes the consistent {@link ErrorResponse} JSON body for a 401 when a
- * request to {@code /api/**} arrives with missing or invalid credentials.
- *
- * <p>Spring Security rejects these requests inside the filter chain, before any
- * controller or the {@code @RestControllerAdvice} runs, so the entry point must
- * format the response itself (Requirements 6.6, 6.7, 7.4).
- *
- * <p>It deliberately omits the {@code WWW-Authenticate} header so the browser
- * does not show its native Basic-auth popup over the Angular login form.
+ * Writes the 401 body, which the {@code @RestControllerAdvice} cannot: these
+ * requests are rejected in the filter chain. Omits {@code WWW-Authenticate} to
+ * suppress the browser's credential prompt.
  */
 @Component
 public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
@@ -40,7 +34,7 @@ public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
         ErrorResponse body = ErrorResponse.of(
                 HttpServletResponse.SC_UNAUTHORIZED,
-                "Authentication required: valid credentials must be provided.");
+                "Authentication required: a valid access token must be provided.");
 
         objectMapper.writeValue(response.getWriter(), body);
     }

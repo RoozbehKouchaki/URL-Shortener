@@ -8,12 +8,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-/**
- * Loads Demo User accounts from the database for Spring Security. Combined with
- * the {@code BCryptPasswordEncoder} bean, Spring Security's
- * {@code DaoAuthenticationProvider} validates the presented Basic-auth
- * credentials against the stored BCrypt hash on every request.
- */
+/** Loads demo accounts for Spring Security's {@code DaoAuthenticationProvider}. */
 @Service
 public class DemoUserDetailsService implements UserDetailsService {
 
