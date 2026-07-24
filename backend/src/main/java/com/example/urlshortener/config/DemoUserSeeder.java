@@ -11,11 +11,8 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 
 /**
- * Seeds the fixed set of predefined Demo User accounts on startup.
- *
- * <p>Each account is created only if it is absent, and left unchanged if it is
- * already present, so restarting the demo neither wipes nor duplicates accounts
- * Only the BCrypt hash of each password is stored.
+ * Seeds the demo accounts on startup, creating each only if absent so a restart
+ * neither wipes nor duplicates them.
  */
 @Component
 public class DemoUserSeeder implements CommandLineRunner {

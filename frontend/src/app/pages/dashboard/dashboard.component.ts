@@ -5,10 +5,6 @@ import { AuthService } from '../../services/auth.service';
 import { CreateLinkComponent } from '../create-link/create-link.component';
 import { MyLinksComponent } from '../my-links/my-links.component';
 
-/**
- * Dashboard shown after a successful sign-in. Hosts the create-link form and
- * the my-links table, and lets the user sign out.
- */
 @Component({
   selector: 'app-dashboard',
   standalone: true,

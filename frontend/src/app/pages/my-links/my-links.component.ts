@@ -3,11 +3,6 @@ import { Component, OnInit, inject } from '@angular/core';
 import { LinksService } from '../../services/links.service';
 import { Link } from '../../models/link';
 
-/**
- * Table of the signed-in user's Links, showing the Short URL, the destination
- * Long URL, the Active/Inactive status, and the Click Count. Each Active row has
- * a Deactivate button that calls the API and reloads the list on success.
- */
 @Component({
   selector: 'app-my-links',
   standalone: true,
@@ -27,7 +22,6 @@ export class MyLinksComponent implements OnInit {
     this.reload();
   }
 
-  /** Fetch the caller's Links, newest first. */
   reload(): void {
     this.loading = true;
     this.error = null;

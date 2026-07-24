@@ -17,11 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.security.Principal;
 import java.util.List;
 
-/**
- * Management endpoints for Links. The authenticated username is taken from the
- * security context and handed to the service; all business logic lives in the
- * service, not here.
- */
+/** Management endpoints. The owner comes from {@code Principal}; logic lives in the service. */
 @RestController
 @RequestMapping("/api/links")
 public class LinkController {

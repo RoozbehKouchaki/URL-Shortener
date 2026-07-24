@@ -9,13 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
 
-/**
- * Public redirect endpoint. Resolves a Short Code to its Long URL and issues a
- * 302, or returns 404 when the code is unknown or its Link is inactive.
- *
- * <p>All logic (resolving the active target and recording the click) lives in
- * {@link LinkService}; this controller only maps the outcome to a response.
- */
+/** Public redirect: 302 to the Long URL, or 404 when unknown or inactive. */
 @RestController
 public class RedirectController {
 

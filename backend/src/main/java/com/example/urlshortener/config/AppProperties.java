@@ -3,10 +3,7 @@ package com.example.urlshortener.config;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-/**
- * Binds the {@code app.*} configuration. {@code baseAddress} is joined with a
- * Short Code to build the Short URL, so it is configurable rather than hardcoded.
- */
+/** Binds {@code app.*}. {@code baseAddress} is joined with a Short Code to build a Short URL. */
 @Component
 @ConfigurationProperties(prefix = "app")
 public class AppProperties {

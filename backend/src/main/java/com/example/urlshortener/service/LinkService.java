@@ -20,9 +20,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-/**
- * Business logic for creating and managing Links.
- */
 @Service
 public class LinkService {
 
@@ -43,11 +40,7 @@ public class LinkService {
         this.appProperties = appProperties;
     }
 
-    /**
-     * Create a new Link owned by {@code ownerUsername}. Each call produces an
-     * independent Link with a fresh Short Code, even when the Long URL matches
-     * an existing one.
-     */
+    /** Each call produces a fresh Short Code, even for a Long URL already stored. */
     @Transactional
     public LinkResponse create(String longUrl, String ownerUsername) {
         String normalizedUrl = longUrl.trim();
@@ -59,10 +52,7 @@ public class LinkService {
         return toResponse(saved);
     }
 
-    /**
-     * Resolve the redirect target for a Short Code, present only when the Link
-     * exists and is active.
-     */
+    /** Empty unless the Link exists and is active. */
     @Transactional(readOnly = true)
     public Optional<String> resolveActiveTarget(String shortCode) {
         return linkRepository.findByShortCode(shortCode)
@@ -71,14 +61,8 @@ public class LinkService {
     }
 
     /**
-     * Resolve the redirect target for a Short Code and, when a target exists,
-     * record the click as a best-effort side effect. This is the single entry
-     * point for the public redirect path: the controller only maps the result
-     * to a 302 (target present) or 404 (empty).
-     *
-     * <p>Click recording runs in its own transaction (via the repository's
-     * atomic update) and is wrapped so that a failure to record never prevents
-     * the redirect from being served.
+     * Entry point for the public redirect path. Click recording is best-effort, so
+     * a failure to record never prevents the redirect from being served.
      */
     public Optional<String> resolveTargetAndRecordClick(String shortCode) {
         Optional<String> target = resolveActiveTarget(shortCode);
@@ -86,10 +70,6 @@ public class LinkService {
         return target;
     }
 
-    /**
-     * Record a click on a Short Code. Best-effort: callers treat a failure here
-     * as non-fatal so the redirect is still served.
-     */
     @Transactional
     public void recordClick(String shortCode) {
         linkRepository.incrementClickCount(shortCode);
@@ -103,9 +83,6 @@ public class LinkService {
         }
     }
 
-    /**
-     * Return the caller's Links, newest first. Empty when the caller owns none.
-     */
     @Transactional(readOnly = true)
     public List<LinkResponse> listMine(String ownerUsername) {
         return linkRepository.findByOwnerUsernameOrderByCreatedAtDesc(ownerUsername).stream()
@@ -113,11 +90,7 @@ public class LinkService {
                 .toList();
     }
 
-    /**
-     * Deactivate a Link the caller owns. Idempotent: an already-inactive Link
-     * stays inactive and still succeeds. The Link and its Click Count are kept,
-     * never deleted.
-     */
+    /** Idempotent, and never deletes: the Link and its Click Count are kept. */
     @Transactional
     public LinkResponse deactivate(String shortCode, String requestingUser) {
         Link link = findOwnedLink(shortCode, requestingUser);
@@ -125,27 +98,17 @@ public class LinkService {
         return toResponse(linkRepository.save(link));
     }
 
-    /**
-     * Return the Click Count for a Link the caller owns.
-     */
     @Transactional(readOnly = true)
     public LinkStatsResponse stats(String shortCode, String requestingUser) {
         Link link = findOwnedLink(shortCode, requestingUser);
         return new LinkStatsResponse(link.getShortCode(), link.getClickCount());
     }
 
-    /**
-     * Map an entity to its client-facing response, joining the configured base
-     * address with the Short Code.
-     */
     public LinkResponse toResponse(Link link) {
         return LinkResponse.from(link, appProperties.getBaseAddress());
     }
 
-    /**
-     * Load a Link by code, rejecting an unknown code (404) and a caller who is
-     * not the owner (403).
-     */
+    /** Rejects an unknown code (404) and a non-owner (403). */
     private Link findOwnedLink(String shortCode, String requestingUser) {
         Link link = linkRepository.findByShortCode(shortCode)
                 .orElseThrow(() -> new LinkNotFoundException("No link found for the given short code."));

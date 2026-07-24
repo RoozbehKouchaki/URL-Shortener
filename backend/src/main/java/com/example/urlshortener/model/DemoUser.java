@@ -5,12 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
-/**
- * A predefined Demo User account used to sign in to the service.
- *
- * <p>Only the BCrypt {@code passwordHash} is stored; plain-text passwords are
- * never persisted. The {@code username} is the natural key.
- */
+/** Seeded demo account. {@code username} is the natural key. */
 @Entity
 @Table(name = "demo_user")
 public class DemoUser {

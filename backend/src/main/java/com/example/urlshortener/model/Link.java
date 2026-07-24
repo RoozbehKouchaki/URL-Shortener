@@ -11,14 +11,9 @@ import jakarta.persistence.UniqueConstraint;
 import java.time.Instant;
 
 /**
- * A stored record that associates a Short Code with its Long URL, its Owner,
- * its active status, its Click Count, and its time of creation.
- *
- * <p>The {@code id} is internal only and is never used to build Short URLs
- * (Short Codes are generated randomly). {@code longUrl} is mapped to
- * {@code VARCHAR(2048)} so that URLs of up to 2048 characters can be stored
- * (Requirement 1.12); the JPA default of {@code VARCHAR(255)} would otherwise
- * reject longer addresses.
+ * {@code longUrl} is {@code VARCHAR(2048)} because the JPA default of 255 would
+ * reject longer addresses. The {@code id} is internal and never used to build
+ * Short URLs.
  */
 @Entity
 @Table(

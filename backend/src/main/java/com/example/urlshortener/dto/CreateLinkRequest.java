@@ -4,11 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-/**
- * Request body for creating a Link. Basic shape (presence, length, http/https
- * scheme) is enforced here; host-level rules (loopback and self-address) are
- * enforced in the service.
- */
+/** Shape only; host rules (loopback, self-address) are enforced in the service. */
 public record CreateLinkRequest(
 
         @NotBlank(message = "Long URL is required.")

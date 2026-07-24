@@ -7,16 +7,8 @@ import { Link } from '../../models/link';
 import { ApiError } from '../../models/api-error';
 
 /**
- * Create-link form: a single Long URL input plus a submit button.
- *
- * <p>On success it shows the returned Short URL (with a copy button) and emits a
- * {@code created} event so the parent can refresh its list. On an HTTP 400 it
- * shows the backend's human-readable validation message (for example a
- * malformed address or a blocked host); other failures show a generic message.
- *
- * <p>Format and blocked-host checks are left to the backend so its validation
- * message is the single source of truth; only presence is
- * enforced on the client.
+ * Only presence is validated here. Format and blocked-host rules are left to the
+ * backend so its message is the single source of truth.
  */
 @Component({
   selector: 'app-create-link',
@@ -29,7 +21,6 @@ export class CreateLinkComponent {
   private readonly fb = inject(FormBuilder);
   private readonly links = inject(LinksService);
 
-  /** Emitted after a successful create so the parent can refresh its list. */
   @Output() created = new EventEmitter<Link>();
 
   readonly form = this.fb.nonNullable.group({
@@ -79,8 +70,7 @@ export class CreateLinkComponent {
       await navigator.clipboard.writeText(this.result.shortUrl);
       this.copied = true;
     } catch {
-      // Clipboard access can be blocked (for example a non-secure context);
-      // the Short URL is still shown for manual copying.
+      // Clipboard can be blocked; the Short URL is still shown for manual copying.
     }
   }
 }
