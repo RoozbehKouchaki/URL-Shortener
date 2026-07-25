@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-/** Shape only; host rules (loopback, self-address) are enforced in the service. */
+/** Shape only; the self-address host rule is enforced in the service. */
 public record CreateLinkRequest(
 
         @NotBlank(message = "Long URL is required.")

@@ -18,7 +18,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Service
 public class LinkService {
@@ -26,7 +25,6 @@ public class LinkService {
     private static final Logger log = LoggerFactory.getLogger(LinkService.class);
 
     private static final int MAX_CODE_ATTEMPTS = 5;
-    private static final Set<String> LOOPBACK_HOSTS = Set.of("localhost", "127.0.0.1", "::1", "[::1]");
 
     private final LinkRepository linkRepository;
     private final ShortCodeGenerator shortCodeGenerator;
@@ -41,7 +39,6 @@ public class LinkService {
     }
 
     /** Each call produces a fresh Short Code, even for a Long URL already stored. */
-    @Transactional
     public LinkResponse create(String longUrl, String ownerUsername) {
         String normalizedUrl = longUrl.trim();
         validateUrl(normalizedUrl);
@@ -53,8 +50,7 @@ public class LinkService {
     }
 
     /** Empty unless the Link exists and is active. */
-    @Transactional(readOnly = true)
-    public Optional<String> resolveActiveTarget(String shortCode) {
+    private Optional<String> resolveActiveTarget(String shortCode) {
         return linkRepository.findByShortCode(shortCode)
                 .filter(Link::isActive)
                 .map(Link::getLongUrl);
@@ -70,20 +66,15 @@ public class LinkService {
         return target;
     }
 
-    @Transactional
-    public void recordClick(String shortCode) {
-        linkRepository.incrementClickCount(shortCode);
-    }
-
+    /** The repository's {@code @Modifying} query carries its own transaction. */
     private void recordClickBestEffort(String shortCode) {
         try {
-            recordClick(shortCode);
+            linkRepository.incrementClickCount(shortCode);
         } catch (RuntimeException e) {
             log.warn("Failed to record click for short code '{}'; serving redirect anyway.", shortCode, e);
         }
     }
 
-    @Transactional(readOnly = true)
     public List<LinkResponse> listMine(String ownerUsername) {
         return linkRepository.findByOwnerUsernameOrderByCreatedAtDesc(ownerUsername).stream()
                 .map(this::toResponse)
@@ -98,13 +89,12 @@ public class LinkService {
         return toResponse(linkRepository.save(link));
     }
 
-    @Transactional(readOnly = true)
     public LinkStatsResponse stats(String shortCode, String requestingUser) {
         Link link = findOwnedLink(shortCode, requestingUser);
         return new LinkStatsResponse(link.getShortCode(), link.getClickCount());
     }
 
-    public LinkResponse toResponse(Link link) {
+    private LinkResponse toResponse(Link link) {
         return LinkResponse.from(link, appProperties.getBaseAddress());
     }
 
@@ -144,10 +134,6 @@ public class LinkService {
         }
 
         String normalizedHost = host.toLowerCase();
-        if (LOOPBACK_HOSTS.contains(normalizedHost)) {
-            throw new InvalidUrlException("Loopback addresses are not allowed.");
-        }
-
         String baseHost = baseAddressHost();
         if (baseHost != null && baseHost.equals(normalizedHost)) {
             throw new InvalidUrlException("The service's own address is not allowed.");

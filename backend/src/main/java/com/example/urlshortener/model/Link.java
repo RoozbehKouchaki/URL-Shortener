@@ -57,10 +57,6 @@ public class Link {
         this.createdAt = Instant.now();
     }
 
-    public Long getId() {
-        return id;
-    }
-
     public String getShortCode() {
         return shortCode;
     }

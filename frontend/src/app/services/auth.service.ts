@@ -20,19 +20,26 @@ export class AuthService {
   private session: Session | null = null;
 
   login(username: string, password: string): Observable<void> {
-    return this.http
-      .post<LoginResponse>('/api/auth/login', { username, password })
-      .pipe(
-        tap((response) => {
-          this.session = {
-            accessToken: response.accessToken,
-            tokenType: response.tokenType,
-            username: response.username,
-            expiresAt: Date.now() + response.expiresIn * 1000
-          };
-        }),
-        map(() => undefined)
-      );
+    return this.startSession('/api/auth/login', username, password);
+  }
+
+  /** Sign-up returns a token too, so the new account is signed in right away. */
+  signup(username: string, password: string): Observable<void> {
+    return this.startSession('/api/auth/signup', username, password);
+  }
+
+  private startSession(url: string, username: string, password: string): Observable<void> {
+    return this.http.post<LoginResponse>(url, { username, password }).pipe(
+      tap((response) => {
+        this.session = {
+          accessToken: response.accessToken,
+          tokenType: response.tokenType,
+          username: response.username,
+          expiresAt: Date.now() + response.expiresIn * 1000
+        };
+      }),
+      map(() => undefined)
+    );
   }
 
   clear(): void {

@@ -4,6 +4,7 @@ import com.example.urlshortener.exception.InvalidUrlException;
 import com.example.urlshortener.exception.LinkNotFoundException;
 import com.example.urlshortener.exception.NotLinkOwnerException;
 import com.example.urlshortener.exception.ShortCodeGenerationException;
+import com.example.urlshortener.exception.UsernameTakenException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -39,6 +40,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidUrlException.class)
     public ResponseEntity<ErrorResponse> handleInvalidUrl(InvalidUrlException ex) {
         return build(HttpStatus.BAD_REQUEST, ex.getMessage(), "longUrl");
+    }
+
+    /**
+     * Sign-up with an existing username -> 409. This does reveal that the username
+     * exists, which is unavoidable for a username the caller must choose.
+     */
+    @ExceptionHandler(UsernameTakenException.class)
+    public ResponseEntity<ErrorResponse> handleUsernameTaken(UsernameTakenException ex) {
+        return build(HttpStatus.CONFLICT, ex.getMessage(), "username");
     }
 
     @ExceptionHandler(NotLinkOwnerException.class)

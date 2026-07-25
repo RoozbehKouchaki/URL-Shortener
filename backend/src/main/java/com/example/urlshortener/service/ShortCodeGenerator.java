@@ -14,7 +14,7 @@ public class ShortCodeGenerator {
     private static final char[] BASE62 =
             "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
 
-    static final int CODE_LENGTH = 7;
+    private static final int CODE_LENGTH = 7;
 
     private final SecureRandom random = new SecureRandom();
 

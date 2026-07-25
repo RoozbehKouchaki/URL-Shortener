@@ -12,7 +12,8 @@ import java.util.Map;
 
 /**
  * Seeds the demo accounts on startup, creating each only if absent so a restart
- * neither wipes nor duplicates them.
+ * neither wipes nor duplicates them. Kept alongside sign-up so the app has a
+ * working login on first launch. A real deployment would not ship this class.
  */
 @Component
 public class DemoUserSeeder implements CommandLineRunner {

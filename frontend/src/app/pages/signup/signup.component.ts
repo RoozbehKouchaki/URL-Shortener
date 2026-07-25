@@ -5,26 +5,27 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
-  selector: 'app-login',
+  selector: 'app-signup',
   standalone: true,
   imports: [ReactiveFormsModule, RouterLink],
-  templateUrl: './login.component.html',
-  styleUrl: './login.component.css'
+  templateUrl: './signup.component.html',
+  // Reuses the login styles: same single-card form layout.
+  styleUrl: '../login/login.component.css'
 })
-export class LoginComponent {
+export class SignupComponent {
   private readonly fb = inject(FormBuilder);
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
 
+  /** Mirrors the server-side constraints in SignupRequest. */
   readonly form = this.fb.nonNullable.group({
-    username: ['', Validators.required],
-    password: ['', Validators.required]
+    username: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(30)]],
+    password: ['', [Validators.required, Validators.minLength(8)]]
   });
 
   submitting = false;
   error: string | null = null;
 
-  /** True once a control is invalid and the user has interacted with it. */
   isInvalid(controlName: 'username' | 'password'): boolean {
     const control = this.form.controls[controlName];
     return control.invalid && control.touched;
@@ -34,7 +35,6 @@ export class LoginComponent {
     this.error = null;
 
     if (this.form.invalid || this.submitting) {
-      // Reveal the per-field messages when required fields are still empty.
       this.form.markAllAsTouched();
       return;
     }
@@ -42,17 +42,18 @@ export class LoginComponent {
     const { username, password } = this.form.getRawValue();
     this.submitting = true;
 
-    this.auth.login(username, password).subscribe({
+    this.auth.signup(username, password).subscribe({
       next: () => {
         this.submitting = false;
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {
         this.submitting = false;
+        // 409 and 400 carry a caller-safe message from the backend.
         this.error =
-          err.status === 401
-            ? 'invalid username or password'
-            : 'Unable to sign in right now. Please try again.';
+          err.status === 409 || err.status === 400
+            ? err.error?.message ?? 'Please check your details.'
+            : 'Unable to sign up right now. Please try again.';
       }
     });
   }

@@ -21,6 +21,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     private static final String LOGIN_PATH = "/api/auth/login";
+    private static final String SIGNUP_PATH = "/api/auth/signup";
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -47,7 +48,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.GET, "/{shortCode:[A-Za-z0-9]{7}}").permitAll()
-                        .requestMatchers(HttpMethod.POST, LOGIN_PATH).permitAll()
+                        .requestMatchers(HttpMethod.POST, LOGIN_PATH, SIGNUP_PATH).permitAll()
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().authenticated())
