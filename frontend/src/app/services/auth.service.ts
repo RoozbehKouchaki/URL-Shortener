@@ -1,50 +1,56 @@
-import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
+import { Observable, map, tap } from 'rxjs';
 
-/**
- * Holds the signed-in Demo User's credentials in memory so the HTTP interceptor
- * can attach an HTTP Basic {@code Authorization} header to every {@code /api}
- * request.
- *
- * <p>Basic auth has no separate login endpoint and the backend is stateless, so
- * the credentials must be re-sent on every request. Keeping the raw credentials
- * on the client is a deliberate demo simplification; a production frontend would
- * sign in once and carry a short-lived token instead.
- *
- * <p>Credentials live only in memory, so a full page reload signs the user out.
- */
+import { LoginResponse } from '../models/auth';
+
+interface Session {
+  accessToken: string;
+  tokenType: string;
+  username: string;
+  /** Epoch milliseconds. */
+  expiresAt: number;
+}
+
+/** Kept in memory rather than web storage, so a page reload signs the user out. */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private credentials: { username: string; password: string } | null = null;
+  private readonly http = inject(HttpClient);
 
-  /** Store the credentials to be sent on subsequent {@code /api} requests. */
-  setCredentials(username: string, password: string): void {
-    this.credentials = { username, password };
+  private session: Session | null = null;
+
+  login(username: string, password: string): Observable<void> {
+    return this.http
+      .post<LoginResponse>('/api/auth/login', { username, password })
+      .pipe(
+        tap((response) => {
+          this.session = {
+            accessToken: response.accessToken,
+            tokenType: response.tokenType,
+            username: response.username,
+            expiresAt: Date.now() + response.expiresIn * 1000
+          };
+        }),
+        map(() => undefined)
+      );
   }
 
-  /** Forget the stored credentials (sign out / failed validation). */
   clear(): void {
-    this.credentials = null;
+    this.session = null;
   }
 
-  /** True once valid credentials have been stored. */
   isAuthenticated(): boolean {
-    return this.credentials !== null;
+    return this.session !== null && Date.now() < this.session.expiresAt;
   }
 
-  /** The signed-in username, or null when signed out. */
   getUsername(): string | null {
-    return this.credentials?.username ?? null;
+    return this.session?.username ?? null;
   }
 
-  /**
-   * The {@code Authorization: Basic <base64(username:password)>} header value,
-   * or null when no credentials are stored.
-   */
   getAuthHeader(): string | null {
-    if (!this.credentials) {
+    if (!this.session) {
       return null;
     }
-    const token = btoa(`${this.credentials.username}:${this.credentials.password}`);
-    return `Basic ${token}`;
+    return `${this.session.tokenType} ${this.session.accessToken}`;
   }
 }
