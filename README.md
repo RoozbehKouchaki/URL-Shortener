@@ -8,10 +8,9 @@ them, and view click statistics.
 ## Tech stack
 
 - **Backend:** Java 21, Spring Boot 3.5 (Web, Data JPA, Security, Validation)
-- **Database:** H2, file-based (links and accounts survive a restart)
+- **Database:** PostgreSQL 17, started from `compose.yml` by Spring Boot
 - **Frontend:** Angular 19
-- **Auth:** JWT bearer tokens (short-lived access token + revocable refresh
-  token) against seeded demo accounts
+- **Auth:** JWT bearer tokens against seeded demo accounts
 
 ## Architecture
 
@@ -29,22 +28,21 @@ them, and view click statistics.
    │ browser  │                   └────────────┼─────────────┘
    └──────────┘                                ▼
                                         ┌──────────────┐
-                                        │  H2 (file)   │
+                                        │  PostgreSQL  │
                                         └──────────────┘
 ```
 
 - **Angular SPA** — login and dashboard. Signs in once, then sends a bearer
-  token on every `/api` call. Renews the token transparently when it expires.
-- **`AuthController`** — sign in, renew, sign out. The only place a password is
-  checked.
+  token on every `/api` call.
+- **`AuthController`** — sign in. The only place a password is checked.
 - **`LinkController`** — the authenticated management API (create, list,
   deactivate, stats).
 - **`RedirectController`** — the public `GET /{shortCode}` path; resolves an
   active link, records the click, and returns a 302 to the long URL.
 - **`LinkService`** — all business logic: URL validation, unique short-code
   generation, ownership checks, and atomic click counting.
-- **JPA repositories over H2** — file-based storage, so links and accounts
-  survive a restart.
+- **JPA repositories over PostgreSQL** — a named Docker volume keeps links and
+  accounts across restarts.
 
 ## Project structure
 
@@ -57,9 +55,11 @@ URL_Shortener/
 ## Prerequisites
 
 - JDK 21
+- Docker with Docker Compose 2.2.0+ (for the database)
 - Node.js 18+ and npm (for the frontend)
-- No local Maven or Angular CLI install required — the backend uses the Maven
-  wrapper (`./mvnw`) and the frontend uses the CLI from its dev dependencies.
+- No local Maven, Angular CLI, or PostgreSQL install required — the backend uses
+  the Maven wrapper (`./mvnw`), the frontend uses the CLI from its dev
+  dependencies, and the database runs in a container.
 
 ## Running the backend
 
@@ -68,9 +68,20 @@ cd backend
 ./mvnw spring-boot:run
 ```
 
-The API starts on `http://localhost:8080`. The H2 file database is created
-under `backend/data/` on first run, and the demo users are seeded automatically
-at startup.
+The API starts on `http://localhost:8080`, and the demo users are seeded at
+startup.
+
+No database setup is needed. The `spring-boot-docker-compose` module starts the
+PostgreSQL service defined in `backend/compose.yml`, supplies the connection
+details to the application, and stops the container on shutdown. Because the
+data lives in a named volume, links and accounts survive a restart.
+
+This is why `application.properties` contains no `spring.datasource.*` entries:
+locally they come from the running container, and deployed environments provide
+`SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, and
+`SPRING_DATASOURCE_PASSWORD` instead. The same build artifact runs in both.
+
+To run the database by hand instead, `docker compose up -d` in `backend/`.
 
 ## Running the frontend
 
@@ -147,6 +158,9 @@ app.base-address=http://localhost:8080
 app.jwt.secret=${APP_JWT_SECRET:...}
 app.jwt.issuer=urlshortener
 app.jwt.access-token-ttl=15m
+
+# Demo-only. Production would use Flyway migrations with ddl-auto=validate.
+spring.jpa.hibernate.ddl-auto=update
 ```
 
 Signing is symmetric (HS256) to keep the demo to a single configuration value.
@@ -165,10 +179,19 @@ The backend test suite includes integration tests covering the active-link
 redirect (302), unknown/inactive lookups (404), cross-user access (403), and
 rejection of missing and tampered tokens (401).
 
+Tests run against in-memory H2 rather than PostgreSQL, so they need no Docker
+and stay fast. The trade-off is that they do not catch dialect differences;
+Testcontainers with a real PostgreSQL would be the production-grade choice.
+
 ## Scope notes
 
 This is a demo. Production concerns such as caching and rate limiting are
-intentionally out of scope. On the auth side, the deliberate omissions are
-refresh tokens (so a page reload signs the user out, and sign-out cannot revoke
-an already-issued access token) and asymmetric RS256 signing with a JWKS
-endpoint.
+intentionally out of scope. The deliberate omissions are:
+
+- **Refresh tokens** — a page reload signs the user out, and sign-out cannot
+  revoke an already-issued access token.
+- **RS256 with a JWKS endpoint** — signing is symmetric, so every instance needs
+  the shared secret.
+- **Versioned migrations** — `ddl-auto=update` lets Hibernate manage the schema.
+  Production needs Flyway with `ddl-auto=validate`.
+- **Testcontainers** — tests use H2 rather than the real database.
