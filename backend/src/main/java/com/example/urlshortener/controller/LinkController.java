@@ -2,7 +2,6 @@ package com.example.urlshortener.controller;
 
 import com.example.urlshortener.dto.CreateLinkRequest;
 import com.example.urlshortener.dto.LinkResponse;
-import com.example.urlshortener.dto.LinkStatsResponse;
 import com.example.urlshortener.service.LinkService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -45,8 +44,9 @@ public class LinkController {
         return linkService.deactivate(shortCode, principal.getName());
     }
 
-    @GetMapping("/{shortCode}/stats")
-    public LinkStatsResponse stats(@PathVariable String shortCode, Principal principal) {
-        return linkService.stats(shortCode, principal.getName());
+    /** Includes {@code clickCount}, so no separate stats endpoint is needed. */
+    @GetMapping("/{shortCode}")
+    public LinkResponse get(@PathVariable String shortCode, Principal principal) {
+        return linkService.get(shortCode, principal.getName());
     }
 }

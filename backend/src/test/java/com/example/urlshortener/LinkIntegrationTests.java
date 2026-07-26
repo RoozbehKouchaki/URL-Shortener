@@ -69,7 +69,7 @@ class LinkIntegrationTests {
                         .header(HttpHeaders.AUTHORIZATION, bobToken))
                 .andExpect(status().isForbidden());
 
-        mockMvc.perform(get("/api/links/" + shortCode + "/stats")
+        mockMvc.perform(get("/api/links/" + shortCode)
                         .header(HttpHeaders.AUTHORIZATION, bobToken))
                 .andExpect(status().isForbidden());
     }

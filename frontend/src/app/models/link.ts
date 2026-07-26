@@ -8,8 +8,3 @@ export interface Link {
   /** ISO-8601 instant. */
   createdAt: string;
 }
-
-export interface LinkStats {
-  shortCode: string;
-  clickCount: number;
-}

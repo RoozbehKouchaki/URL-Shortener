@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { Link, LinkStats } from '../models/link';
+import { Link } from '../models/link';
 
 /** The Authorization header is added by the auth interceptor, not here. */
 @Injectable({ providedIn: 'root' })
@@ -25,9 +25,8 @@ export class LinksService {
     );
   }
 
-  stats(shortCode: string): Observable<LinkStats> {
-    return this.http.get<LinkStats>(
-      `${this.baseUrl}/${encodeURIComponent(shortCode)}/stats`
-    );
+  /** Returns the full link, including its click count. */
+  get(shortCode: string): Observable<Link> {
+    return this.http.get<Link>(`${this.baseUrl}/${encodeURIComponent(shortCode)}`);
   }
 }

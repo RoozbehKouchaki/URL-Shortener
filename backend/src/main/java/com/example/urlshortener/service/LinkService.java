@@ -2,7 +2,6 @@ package com.example.urlshortener.service;
 
 import com.example.urlshortener.config.AppProperties;
 import com.example.urlshortener.dto.LinkResponse;
-import com.example.urlshortener.dto.LinkStatsResponse;
 import com.example.urlshortener.exception.InvalidUrlException;
 import com.example.urlshortener.exception.LinkNotFoundException;
 import com.example.urlshortener.exception.NotLinkOwnerException;
@@ -89,9 +88,8 @@ public class LinkService {
         return toResponse(linkRepository.save(link));
     }
 
-    public LinkStatsResponse stats(String shortCode, String requestingUser) {
-        Link link = findOwnedLink(shortCode, requestingUser);
-        return new LinkStatsResponse(link.getShortCode(), link.getClickCount());
+    public LinkResponse get(String shortCode, String requestingUser) {
+        return toResponse(findOwnedLink(shortCode, requestingUser));
     }
 
     private LinkResponse toResponse(Link link) {

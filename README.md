@@ -128,16 +128,17 @@ curl -H "Authorization: Bearer <accessToken>" http://localhost:8080/api/links
 
 ## API reference
 
-All `/api/**` endpoints require a bearer token, except `/api/auth/login`. The
-redirect endpoint is public.
+All `/api/**` endpoints require a bearer token, except `/api/auth/login` and
+`/api/auth/signup`. The redirect endpoint is public.
 
 | Method | Path                              | Description                                  |
 | ------ | --------------------------------- | -------------------------------------------- |
 | `POST` | `/api/auth/login`                 | Exchange credentials for an access token     |
+| `POST` | `/api/auth/signup`                | Register an account and receive a token      |
 | `POST` | `/api/links`                      | Create a short link (`{ "longUrl": "..." }`) |
 | `GET`  | `/api/links`                      | List the caller's links, newest first        |
+| `GET`  | `/api/links/{shortCode}`          | Get one link the caller owns, including its click count |
 | `POST` | `/api/links/{shortCode}/deactivate` | Deactivate a link the caller owns           |
-| `GET`  | `/api/links/{shortCode}/stats`    | Get the click count for a link the caller owns |
 | `GET`  | `/{shortCode}`                    | Public redirect to the long URL (302)        |
 
 Short codes are 7-character base62 strings generated randomly. A redirect to an
